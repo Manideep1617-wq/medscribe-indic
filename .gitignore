@@ -1,0 +1,29 @@
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database
+*.sqlite3
+*.db
+backend/medscribe.db
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

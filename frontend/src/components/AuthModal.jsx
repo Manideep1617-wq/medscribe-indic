@@ -36,8 +36,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       onLoginSuccess(data.doctor);
       onClose();
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.detail || 'Authentication failed. Please verify credentials.');
+      console.error('Auth error:', err);
+      if (!err.response) {
+        setError('Cannot connect to backend server (is the backend running on port 8000 / Render?). Click "1-Click Demo Login" above to continue in offline demo mode.');
+      } else {
+        setError(err.response?.data?.detail || 'Authentication failed. Please verify credentials.');
+      }
     } finally {
       setLoading(false);
     }
@@ -46,27 +50,25 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const handleQuickDemoLogin = async () => {
     setError('');
     setLoading(true);
+    const demoDoctor = {
+      id: 1,
+      name: 'Dr. Aarav Sharma, MD (AIIMS)',
+      email: 'doctor@aiims.edu.in',
+      department: 'General Medicine & Diabetology',
+      hospital_name: 'AIIMS Hospital & Research Center',
+    };
+
     try {
       const data = await authAPI.login('doctor@aiims.edu.in', 'password123');
       localStorage.setItem('medscribe_token', data.access_token);
       onLoginSuccess(data.doctor);
       onClose();
     } catch (err) {
-      // If default not found, register it automatically
-      try {
-        const reg = await authAPI.register({
-          name: 'Dr. Aarav Sharma, MD (AIIMS)',
-          email: 'doctor@aiims.edu.in',
-          password: 'password123',
-          department: 'General Medicine & Diabetology',
-          hospital_name: 'AIIMS Research Hospital',
-        });
-        localStorage.setItem('medscribe_token', reg.access_token);
-        onLoginSuccess(reg.doctor);
-        onClose();
-      } catch (regErr) {
-        setError('Quick login failed: ' + (regErr.response?.data?.detail || regErr.message));
-      }
+      // If backend unreachable or login fails, provide instant demo session so presentation never blocks
+      console.warn('Backend unavailable, using instant demo doctor profile:', err);
+      localStorage.setItem('medscribe_token', 'demo-aiims-doctor-token-2026');
+      onLoginSuccess(demoDoctor);
+      onClose();
     } finally {
       setLoading(false);
     }
